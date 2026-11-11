@@ -304,4 +304,40 @@ describe('MarketReviewReportView', () => {
 
     expect(onOpenRunFlow).toHaveBeenCalledWith(7);
   });
+
+  it('translates Chinese index names into English for English reports', () => {
+    const payloadWithChineseIndices: MarketReviewPayload = {
+      version: 1,
+      kind: 'market_review',
+      region: 'us',
+      title: 'US Market Recap',
+      indices: [
+        { code: 'SPX', name: '标普500指数', current: 7619.38, changePct: 1.31 },
+        { code: 'IXIC', name: '纳斯达克综合指数', current: 25466.19, changePct: 1.6 },
+        { code: 'DJI', name: '道琼斯工业指数', current: 52486.49, changePct: 0.49 },
+        { code: 'VIX', name: 'VIX恐慌指数', current: 17.49, changePct: -10.12 },
+      ],
+      sections: [
+        {
+          key: 'index_commentary',
+          title: 'Major Indices',
+          markdown: '- **标普500指数**: 7619.38 (+1.31%)\n- **纳斯达克综合指数**: 25466.19 (+1.60%)',
+        },
+      ],
+    };
+
+    render(
+      <MarketReviewReportView
+        payload={payloadWithChineseIndices}
+        reportLanguage="en"
+      />,
+    );
+
+    expect(screen.getAllByText('S&P 500')).toHaveLength(2);
+    expect(screen.getAllByText('Nasdaq Composite')).toHaveLength(2);
+    expect(screen.getByText('Dow Jones Industrial Average')).toBeInTheDocument();
+    expect(screen.getByText('Cboe VIX')).toBeInTheDocument();
+    expect(screen.queryByText('标普500指数')).not.toBeInTheDocument();
+    expect(screen.queryByText('纳斯达克综合指数')).not.toBeInTheDocument();
+  });
 });

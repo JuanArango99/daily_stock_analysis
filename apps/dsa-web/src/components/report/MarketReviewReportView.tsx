@@ -257,6 +257,44 @@ const formatMarketHighLow = (high: unknown, low: unknown): string => {
   return highText === '-' && lowText === '-' ? '-' : `${highText} / ${lowText}`;
 };
 
+const INDEX_NAME_TRANSLATIONS: Record<string, string> = {
+  '标普500指数': 'S&P 500',
+  '标普500': 'S&P 500',
+  '纳斯达克综合指数': 'Nasdaq Composite',
+  '纳斯达克': 'Nasdaq',
+  '纳斯达克100指数': 'Nasdaq 100',
+  '道琼斯工业指数': 'Dow Jones Industrial Average',
+  '道琼斯工业平均指数': 'Dow Jones Industrial Average',
+  '道琼斯': 'Dow Jones',
+  'VIX恐慌指数': 'Cboe VIX',
+  '罗素2000指数': 'Russell 2000',
+  '上证指数': 'SSE Composite',
+  '深证成指': 'SZSE Component',
+  '创业板指': 'ChiNext',
+  '科创50': 'STAR 50',
+  '上证50': 'SSE 50',
+  '沪深300': 'CSI 300',
+  '恒生指数': 'Hang Seng Index',
+  '恒生科技指数': 'Hang Seng Tech Index',
+  '国企指数': 'Hang Seng China Enterprises Index',
+};
+
+const formatIndexDisplayName = (name: string, language: ReportLanguage): string => {
+  if (language === 'zh') return name;
+  return INDEX_NAME_TRANSLATIONS[name] ?? name;
+};
+
+const translateMarkdownIndexNames = (markdown: string, language: ReportLanguage): string => {
+  if (language === 'zh') return markdown;
+  let translated = markdown;
+  for (const [zh, en] of Object.entries(INDEX_NAME_TRANSLATIONS)) {
+    if (translated.includes(zh)) {
+      translated = translated.replaceAll(zh, en);
+    }
+  }
+  return translated;
+};
+
 const MARKET_REVIEW_TEXT: Record<ReportLanguage, {
   reviewSummary: string;
   noReviewSummary: string;
@@ -446,7 +484,7 @@ export const MarketReviewReportView: React.FC<MarketReviewReportViewProps> = ({
     }
   }, [content]);
 
-  const insightCards = useMemo(() => [
+  const insightCards = [
     {
       icon: FileText,
       label: marketReviewText.reviewSummary,
@@ -469,7 +507,7 @@ export const MarketReviewReportView: React.FC<MarketReviewReportViewProps> = ({
       label: marketReviewText.riskAndWatch,
       value: summary?.trendPrediction || marketReviewText.noRiskWatch,
     },
-  ], [marketReviewText, summary, text.marketSentiment]);
+  ];
 
   return (
     <div className={`animate-fade-in space-y-4 pb-8 ${className}`}>
@@ -630,7 +668,9 @@ export const MarketReviewReportView: React.FC<MarketReviewReportViewProps> = ({
                       <tbody className="divide-y divide-subtle">
                         {marketData.indices.map((index) => (
                           <tr key={index.code || index.name}>
-                            <td className="px-2 py-2 font-medium text-foreground">{index.name}</td>
+                            <td className="px-2 py-2 font-medium text-foreground">
+                              {formatIndexDisplayName(index.name, normalizedReportLanguage)}
+                            </td>
                             <td className="px-2 py-2 text-secondary-text">{formatMarketNumber(index.current)}</td>
                             <td className="px-2 py-2 text-secondary-text">{formatMarketPercent(index.changePct)}</td>
                             <td className="px-2 py-2 text-secondary-text">{formatMarketHighLow(index.high, index.low)}</td>
@@ -735,7 +775,7 @@ export const MarketReviewReportView: React.FC<MarketReviewReportViewProps> = ({
                 <h3 className="text-base font-semibold text-foreground">{title}</h3>
               </div>
               <ReportMarkdownBody
-                content={sectionContent}
+                content={translateMarkdownIndexNames(sectionContent, normalizedReportLanguage)}
                 className="market-review-markdown"
               />
             </Card>

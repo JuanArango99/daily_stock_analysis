@@ -615,9 +615,15 @@ Focus on index trend, liquidity, and sector rotation to shape the next-session t
 
             if data_list:
                 for item in data_list:
+                    raw_name = item['name']
+                    name = (
+                        _INDEX_ENGLISH_NAMES.get(raw_name, raw_name)
+                        if self._get_review_language() == "en"
+                        else raw_name
+                    )
                     index = MarketIndex(
                         code=item['code'],
-                        name=item['name'],
+                        name=name,
                         current=item['current'],
                         change=item['change'],
                         change_pct=item['change_pct'],

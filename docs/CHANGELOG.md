@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- [修复] 翻译前端与大盘复盘报告中的指数名称为英文 (S&P 500, Nasdaq Composite, Dow Jones, Cboe VIX) 并支持 SO_REUSEADDR 端口复用快速重启。
+
 - [安全] 外部新闻面上下文（`news_context`）注入提示词前中和包含的反引号（```）以防 Markdown 代码块越界逃逸，并使用 `<market_news_context data-untrusted="true">` 显式隔离；自定义 Skill 提示词注明来源标识并在 SkillAgent 提示词中隔离展示。
 
 - [改进] SkillAgent 运行时工具白名单支持以 `allowed_tools` 作为上限约束（ceiling）：当技能指定 `allowed_tools` 且包含 DSA 工具定义时，实际可用工具限制为 `required_tools ∩ allowed_tools`（未指定 required_tools 时限制默认行情工具集）；保留非 DSA 元数据（如 Claude Code `Read`/`Grep`）兼容性。
