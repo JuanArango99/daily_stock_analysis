@@ -93,15 +93,23 @@ class SkillAgent(BaseAgent):
         if self._skill:
             instructions = self._skill.instructions or self._skill.description
             display = self._skill.display_name
+            is_custom = bool(self._skill.source and self._skill.source != "builtin")
         else:
             instructions = f"Evaluate the '{self.skill_id}' skill."
             display = self.skill_id
+            is_custom = False
+
+        instruction_block = (
+            f"```\n{instructions}\n```"
+            if is_custom
+            else instructions
+        )
 
         return f"""\
 You are a **Skill Evaluation Agent** applying the **{display}** skill.
 
 ## Skill Instructions
-{instructions}
+{instruction_block}
 
 ## Task
 Evaluate whether the current stock conditions satisfy this skill's entry

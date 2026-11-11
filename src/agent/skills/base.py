@@ -464,8 +464,11 @@ class SkillManager:
                 support_ref = ""
                 if skill.bundle_dir and skill.entrypoint.endswith("SKILL.md"):
                     support_ref = "（bundle）"
+                source_ref = ""
+                if skill.source and skill.source != "builtin":
+                    source_ref = "（自定义）"
                 parts.append(
-                    f"### 技能 {idx}: {skill.display_name} {rules_ref}{support_ref}\n\n"
+                    f"### 技能 {idx}: {skill.display_name} {rules_ref}{support_ref}{source_ref}\n\n"
                     f"**适用场景**: {skill.description}\n\n"
                     f"{skill.instructions}\n"
                 )

@@ -4929,8 +4929,11 @@ Output strictly in the following JSON format. This is a complete Decision Dashbo
 
 ## 📰 舆情情报
 """
-        if news_context and english:
-            prompt += f"""
+        if news_context:
+            # Neutralize potential markdown code-fence breakouts from untrusted web snippets
+            sanitized_news = news_context.replace("```", "'''")
+            if english:
+                prompt += f"""
 Below are the news search results for **{stock_name}({code})** from the last {news_window_days} days. Focus on extracting:
 1. 🚨 **Risk alerts**: shareholder reductions, penalties, negative news
 2. 🎯 **Positive catalysts**: earnings, contracts, policy
@@ -4940,12 +4943,14 @@ Below are the news search results for **{stock_name}({code})** from the last {ne
    - Ignore all news older than the last {news_window_days} days
    - Ignore all news whose publication date is unknown or cannot be determined
 
+<market_news_context data-untrusted="true">
 ```
-{news_context}
+{sanitized_news}
 ```
+</market_news_context>
 """
-        elif news_context:
-            prompt += f"""
+            else:
+                prompt += f"""
 以下是 **{stock_name}({code})** 近{news_window_days}日的新闻搜索结果，请重点提取：
 1. 🚨 **风险警报**：减持、处罚、利空
 2. 🎯 **利好催化**：业绩、合同、政策
@@ -4955,9 +4960,11 @@ Below are the news search results for **{stock_name}({code})** from the last {ne
    - 超出近{news_window_days}日窗口的新闻一律忽略
    - 时间未知、无法确定发布日期的新闻一律忽略
 
+<market_news_context data-untrusted="true">
 ```
-{news_context}
+{sanitized_news}
 ```
+</market_news_context>
 """
         elif english:
             prompt += """
