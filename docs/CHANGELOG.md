@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- [改进] SkillAgent 运行时工具白名单支持以 `allowed_tools` 作为上限约束（ceiling）：当技能指定 `allowed_tools` 且包含 DSA 工具定义时，实际可用工具限制为 `required_tools ∩ allowed_tools`（未指定 required_tools 时限制默认行情工具集）；保留非 DSA 元数据（如 Claude Code `Read`/`Grep`）兼容性。
+
 - [修复] 多 Agent 专家模式下未声明 `required_tools`（或加载失败）的 Skill 不再默认获得完整工具注册表（含持仓 `get_portfolio_snapshot`、新闻搜索等），改为只读行情工具集 `get_realtime_quote` / `get_daily_history` / `analyze_trend`；YAML 中以逗号分隔字符串书写的 `required_tools` 现按工具名拆分（与 `SKILL.md` 一致）。已声明 `required_tools` 的内置与自定义 Skill 行为不变。
 
 - [文档] 恢复 README、部署指南及模型/搜索配置表中的 Anspire 可点击链接并保留推广码，继续作为 SerpAPI 后的可选搜索服务。

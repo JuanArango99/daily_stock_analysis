@@ -50,6 +50,23 @@ class SkillAgent(BaseAgent):
         # Always bind an explicit tool list: ``tool_names = None`` means
         # "full registry" in BaseAgent, which is never appropriate here.
         declared_tools = list(self._skill.required_tools) if self._skill else []
+        allowed_tools = list(self._skill.allowed_tools) if self._skill else []
+
+        # If allowed_tools is specified and contains known tool definitions from the registry,
+        # enforce it as an upper-bound allowlist (ceiling). Non-DSA metadata
+        # (e.g. Claude Code tool names like "Read", "Grep") is ignored to preserve bundle compatibility.
+        if allowed_tools and self.tool_registry is not None:
+            # Use __contains__ to check if tool is in registry (also avoids MagicMock.get() returning truthy mocks)
+            known_allowed = {
+                t for t in allowed_tools
+                if t in self.tool_registry
+            }
+            if known_allowed:
+                if declared_tools:
+                    declared_tools = [t for t in declared_tools if t in known_allowed]
+                else:
+                    declared_tools = [t for t in DEFAULT_SKILL_TOOL_NAMES if t in known_allowed]
+
         if declared_tools:
             self.tool_names = declared_tools
         else:

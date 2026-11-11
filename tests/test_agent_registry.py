@@ -1000,3 +1000,42 @@ class TestSkillAgent(unittest.TestCase):
             skill = load_skill_from_yaml(path)
 
         self.assertEqual(skill.required_tools, ["get_daily_history", "analyze_trend"])
+
+    def test_allowed_tools_enforces_ceiling_on_required_tools(self):
+        skill = Skill(
+            name="ceiling_skill",
+            display_name="Ceiling Skill",
+            description="desc",
+            instructions="do work",
+            required_tools=["analyze_trend", "get_daily_history", "search_stock_news"],
+            allowed_tools=["analyze_trend", "get_daily_history"],
+        )
+        agent, registry = self._build_skill_agent(skill)
+        self.assertEqual(agent.tool_names, ["analyze_trend", "get_daily_history"])
+        self.assertNotIn("search_stock_news", agent.tool_names)
+
+    def test_allowed_tools_enforces_ceiling_on_default_tools_when_no_required_tools(self):
+        skill = Skill(
+            name="default_ceiling_skill",
+            display_name="Default Ceiling Skill",
+            description="desc",
+            instructions="do work",
+            required_tools=[],
+            allowed_tools=["analyze_trend"],
+        )
+        agent, registry = self._build_skill_agent(skill)
+        self.assertEqual(agent.tool_names, ["analyze_trend"])
+        self.assertNotIn("get_realtime_quote", agent.tool_names)
+        self.assertNotIn("get_daily_history", agent.tool_names)
+
+    def test_bundle_metadata_allowed_tools_ignored_when_no_dsa_tools_match(self):
+        skill = Skill(
+            name="bundle_compat_skill",
+            display_name="Bundle Compat Skill",
+            description="desc",
+            instructions="do work",
+            required_tools=["analyze_trend"],
+            allowed_tools=["Read", "Grep", "Bash"],
+        )
+        agent, registry = self._build_skill_agent(skill)
+        self.assertEqual(agent.tool_names, ["analyze_trend"])
