@@ -57,6 +57,32 @@ _CHINESE_SECTION_PATTERNS = {
 }
 
 
+_INDEX_ENGLISH_NAMES: Dict[str, str] = {
+    # US indices
+    "标普500指数": "S&P 500",
+    "标普500": "S&P 500",
+    "纳斯达克综合指数": "Nasdaq Composite",
+    "纳斯达克": "Nasdaq",
+    "道琼斯工业指数": "Dow Jones",
+    "道琼斯工业平均指数": "Dow Jones",
+    "道琼斯": "Dow Jones",
+    "VIX恐慌指数": "Cboe VIX",
+    "纳斯达克100指数": "Nasdaq 100",
+    "罗素2000指数": "Russell 2000",
+    # China A-share indices
+    "上证指数": "SSE Composite",
+    "深证成指": "SZSE Component",
+    "创业板指": "ChiNext",
+    "科创50": "STAR 50",
+    "上证50": "SSE 50",
+    "沪深300": "CSI 300",
+    # Hong Kong indices
+    "恒生指数": "Hang Seng Index",
+    "恒生科技指数": "Hang Seng Tech Index",
+    "国企指数": "Hang Seng China Enterprises",
+}
+
+
 @dataclass
 class MarketIndex:
     """大盘指数数据"""
@@ -1374,8 +1400,13 @@ Focus on index trend, liquidity, and sector rotation to shape the next-session t
             arrow = self._get_index_change_arrow(idx.change_pct)
             amount_raw = idx.amount or 0.0
             amount_str = self._format_turnover_value(amount_raw)
+            display_name = (
+                _INDEX_ENGLISH_NAMES.get(idx.name, idx.name)
+                if self._get_review_language() == "en"
+                else idx.name
+            )
             lines.append(
-                f"| {idx.name} | {idx.current:.2f} | {arrow} {idx.change_pct:+.2f}% | "
+                f"| {display_name} | {idx.current:.2f} | {arrow} {idx.change_pct:+.2f}% | "
                 f"{self._format_optional_number(idx.open)} | {self._format_optional_number(idx.high)} | "
                 f"{self._format_optional_number(idx.low)} | {self._format_optional_pct(idx.amplitude)} | {amount_str} |"
             )
@@ -1930,7 +1961,12 @@ Output the report content directly, no extra commentary.
         indices_text = ""
         for idx in overview.indices[:4]:
             marker = self._get_index_change_arrow(idx.change_pct)
-            indices_text += f"- **{idx.name}**: {idx.current:.2f} ({marker} {idx.change_pct:+.2f}%)\n"
+            idx_label = (
+                _INDEX_ENGLISH_NAMES.get(idx.name, idx.name)
+                if template_language == "en"
+                else idx.name
+            )
+            indices_text += f"- **{idx_label}**: {idx.current:.2f} ({marker} {idx.change_pct:+.2f}%)\n"
         
         # 板块信息
         separator = ", " if template_language == "en" else "、"
