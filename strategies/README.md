@@ -37,6 +37,9 @@ core_rules: [1, 2]
 # 策略需要使用的工具列表，可选
 # 可用工具：get_daily_history, analyze_trend, get_realtime_quote,
 #           get_sector_rankings, search_stock_news, get_stock_info
+# 未声明时，多 Agent 专家模式下仅开放只读行情工具：
+#           get_realtime_quote, get_daily_history, analyze_trend
+# 需要新闻、板块等其他工具时请显式列出。
 required_tools:
   - get_daily_history
   - analyze_trend

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- [修复] 多 Agent 专家模式下未声明 `required_tools`（或加载失败）的 Skill 不再默认获得完整工具注册表（含持仓 `get_portfolio_snapshot`、新闻搜索等），改为只读行情工具集 `get_realtime_quote` / `get_daily_history` / `analyze_trend`；YAML 中以逗号分隔字符串书写的 `required_tools` 现按工具名拆分（与 `SKILL.md` 一致）。已声明 `required_tools` 的内置与自定义 Skill 行为不变。
+
 - [文档] 恢复 README、部署指南及模型/搜索配置表中的 Anspire 可点击链接并保留推广码，继续作为 SerpAPI 后的可选搜索服务。
 
 - [改进] 下线 Anspire 合作宣传及专属额度说明，移除 README 推荐入口，调整配置示例和渠道展示顺序；新闻搜索顺序调整至 SerpAPI 之后，保留原推广码链接、已有 Key 和模型渠道兼容。

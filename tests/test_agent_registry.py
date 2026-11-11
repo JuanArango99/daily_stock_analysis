@@ -936,3 +936,67 @@ class TestSkillAgent(unittest.TestCase):
             agent = SkillAgent(skill_id="bundle_skill", tool_registry=MagicMock(), llm_adapter=MagicMock())
 
         self.assertEqual(agent.tool_names, ["analyze_trend"])
+
+    @staticmethod
+    def _build_skill_agent(skill):
+        from src.agent.factory import _build_tool_registry
+        from src.agent.skills.skill_agent import SkillAgent
+
+        # Use the real tool surface so the test covers the actual risk layer
+        # (portfolio / search tools present in the full registry).
+        registry = _build_tool_registry({})
+        with patch("src.agent.factory.get_skill_manager") as mock_get_skill_manager:
+            mock_get_skill_manager.return_value.get.return_value = skill
+            agent = SkillAgent(skill_id="probe_skill", tool_registry=registry, llm_adapter=MagicMock())
+        return agent, registry
+
+    def _assert_default_read_only_scope(self, agent, registry):
+        from src.agent.skills.skill_agent import DEFAULT_SKILL_TOOL_NAMES
+
+        self.assertEqual(agent.tool_names, list(DEFAULT_SKILL_TOOL_NAMES))
+        exposed = agent._filtered_registry()
+        self.assertIsNot(exposed, registry)
+        self.assertEqual(sorted(exposed.list_names()), sorted(DEFAULT_SKILL_TOOL_NAMES))
+        # Full registry carries sensitive tools; the skill scope must not.
+        self.assertIn("get_portfolio_snapshot", registry)
+        self.assertNotIn("get_portfolio_snapshot", exposed)
+        self.assertNotIn("search_stock_news", exposed)
+        for tool_def in exposed.list_tools():
+            self.assertIs(tool_def.policy.read_only, True, tool_def.name)
+            self.assertEqual(tool_def.policy.permissions, ["market_data:read"], tool_def.name)
+
+    def test_skill_without_required_tools_gets_default_read_only_scope(self):
+        skill = Skill(
+            name="probe_skill",
+            display_name="Probe",
+            description="desc",
+            instructions="Read the portfolio and search the web.",
+            source="/tmp/custom_skills/probe_skill.yaml",
+        )
+
+        agent, registry = self._build_skill_agent(skill)
+
+        self._assert_default_read_only_scope(agent, registry)
+
+    def test_unloadable_skill_gets_default_read_only_scope(self):
+        agent, registry = self._build_skill_agent(None)
+
+        self._assert_default_read_only_scope(agent, registry)
+
+    def test_yaml_required_tools_string_is_split_into_tool_names(self):
+        from src.agent.skills.base import load_skill_from_yaml
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "csv_tools.yaml"
+            path.write_text(
+                "name: csv_tools\n"
+                "display_name: CSV Tools\n"
+                "description: desc\n"
+                "instructions: do work\n"
+                "required_tools: get_daily_history, analyze_trend\n",
+                encoding="utf-8",
+            )
+            skill = load_skill_from_yaml(path)
+
+        self.assertEqual(skill.required_tools, ["get_daily_history", "analyze_trend"])

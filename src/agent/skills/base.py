@@ -180,7 +180,7 @@ def load_skill_from_yaml(filepath: Union[str, Path]) -> Skill:
         instructions=str(data["instructions"]).strip(),
         category=str(data.get("category", "trend")).strip(),
         core_rules=data.get("core_rules", []) or [],
-        required_tools=data.get("required_tools", []) or [],
+        required_tools=_coerce_string_list(data.get("required_tools")),
         allowed_tools=_coerce_string_list(data.get("allowed_tools")),
         aliases=_coerce_string_list(data.get("aliases")),
         enabled=False,

@@ -21,6 +21,17 @@ from src.agent.skills.defaults import build_skill_agent_name
 
 logger = logging.getLogger(__name__)
 
+# Fallback tool scope for skills that do not declare ``required_tools`` (or
+# that fail to load). Skill definitions can come from a user-configured
+# directory (``AGENT_SKILL_DIR``), so an undeclared scope must never widen to
+# the full tool registry (which includes portfolio and search tools). These
+# tools are all read-only, stock-scoped ``market_data:read`` tools.
+DEFAULT_SKILL_TOOL_NAMES: tuple[str, ...] = (
+    "get_realtime_quote",
+    "get_daily_history",
+    "analyze_trend",
+)
+
 
 class SkillAgent(BaseAgent):
     """Agent that evaluates a single trading skill for a stock."""
@@ -36,10 +47,18 @@ class SkillAgent(BaseAgent):
         self.agent_name = build_skill_agent_name(resolved_skill_id)
         self._skill = self._load_skill(resolved_skill_id)
 
-        if self._skill:
-            tool_names = self._skill.required_tools
-            if tool_names:
-                self.tool_names = list(tool_names)
+        # Always bind an explicit tool list: ``tool_names = None`` means
+        # "full registry" in BaseAgent, which is never appropriate here.
+        declared_tools = list(self._skill.required_tools) if self._skill else []
+        if declared_tools:
+            self.tool_names = declared_tools
+        else:
+            logger.info(
+                "[SkillAgent:%s] no required_tools declared; using default read-only tool scope %s",
+                resolved_skill_id,
+                list(DEFAULT_SKILL_TOOL_NAMES),
+            )
+            self.tool_names = list(DEFAULT_SKILL_TOOL_NAMES)
 
     @staticmethod
     def _load_skill(skill_id: str):
