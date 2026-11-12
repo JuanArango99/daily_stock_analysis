@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- [改进] 更新 GitHub Actions 每日分析工作流默认计划为美股收盘后执行，并默认使用英文报告、美股大盘复盘与美股默认清单。
+
 - [修复] 翻译前端与大盘复盘报告中的指数名称为英文 (S&P 500, Nasdaq Composite, Dow Jones, Cboe VIX) 并支持 SO_REUSEADDR 端口复用快速重启。
 
 - [安全] 外部新闻面上下文（`news_context`）注入提示词前中和包含的反引号（```）以防 Markdown 代码块越界逃逸，并使用 `<market_news_context data-untrusted="true">` 显式隔离；自定义 Skill 提示词注明来源标识并在 SkillAgent 提示词中隔离展示。
