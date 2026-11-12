@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- [改进] 每日分析工作流默认报告类型设为 brief，向通知渠道推送单条精简仪表盘看板以避免长文拆包刷屏。
+
 - [改进] 更新 GitHub Actions 每日分析工作流默认计划为美股收盘后执行，并默认使用英文报告、美股大盘复盘与美股默认清单。
 
 - [修复] 翻译前端与大盘复盘报告中的指数名称为英文 (S&P 500, Nasdaq Composite, Dow Jones, Cboe VIX) 并支持 SO_REUSEADDR 端口复用快速重启。
